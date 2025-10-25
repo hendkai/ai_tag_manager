@@ -1,0 +1,30 @@
+# Build artifacts
+*.xpi
+*.zip
+dist/
+build/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Dependencies
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local settings (contains API keys!)
+*.local.json
+
+# Temporary files
+*.tmp
+.cache/
