@@ -33,7 +33,7 @@ An intelligent Thunderbird extension that uses artificial intelligence to automa
 
 1. **Clone or download the repository**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/hendkai/ai_tag_manager
    cd ai_tag_manager
    ```
 
