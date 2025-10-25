@@ -379,7 +379,7 @@ async function cleanupTags() {
  * Show status message
  */
 function showStatus(message, type) {
-  statusDiv.innerHTML = '';
+  statusDiv.textContent = '';
   statusDiv.className = type;
   statusDiv.style.display = 'block';
 

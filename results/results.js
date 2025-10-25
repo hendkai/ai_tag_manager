@@ -23,6 +23,89 @@ function clearElement(element) {
   }
 }
 
+function createSuggestionItem(suggestion, index, type) {
+  const div = document.createElement('div');
+  div.className = 'suggestion-item';
+  div.dataset.index = index;
+
+  const header = document.createElement('div');
+  header.className = 'suggestion-header';
+
+  const checkbox = document.createElement('input');
+  checkbox.type = 'checkbox';
+  checkbox.className = 'suggestion-checkbox';
+  checkbox.dataset.index = index;
+  header.appendChild(checkbox);
+
+  const content = document.createElement('div');
+  content.className = 'suggestion-content';
+
+  if (type === 'similar') {
+    const preview = document.createElement('div');
+    preview.className = 'tag-preview';
+
+    suggestion.group.forEach(tag => {
+      const span = document.createElement('span');
+      span.className = 'tag-name tag-group';
+      span.textContent = tag;
+      preview.appendChild(span);
+      preview.appendChild(document.createTextNode(' '));
+    });
+
+    const arrow = document.createElement('span');
+    arrow.className = 'arrow';
+    arrow.textContent = '→';
+    preview.appendChild(arrow);
+
+    const newTag = document.createElement('span');
+    newTag.className = 'tag-name tag-new';
+    newTag.textContent = suggestion.suggested_name;
+    preview.appendChild(newTag);
+
+    content.appendChild(preview);
+
+    const reason = document.createElement('div');
+    reason.className = 'reason';
+    reason.textContent = suggestion.reason;
+    content.appendChild(reason);
+
+    const impact = document.createElement('div');
+    impact.className = 'impact';
+    impact.textContent = `💡 ${suggestion.group.length} tags will be merged into 1 tag`;
+    content.appendChild(impact);
+  } else if (type === 'rename') {
+    const preview = document.createElement('div');
+    preview.className = 'tag-preview';
+
+    const oldTag = document.createElement('span');
+    oldTag.className = 'tag-name tag-old';
+    oldTag.textContent = suggestion.old_name;
+    preview.appendChild(oldTag);
+
+    const arrow = document.createElement('span');
+    arrow.className = 'arrow';
+    arrow.textContent = '→';
+    preview.appendChild(arrow);
+
+    const newTag = document.createElement('span');
+    newTag.className = 'tag-name tag-new';
+    newTag.textContent = suggestion.new_name;
+    preview.appendChild(newTag);
+
+    content.appendChild(preview);
+
+    const reason = document.createElement('div');
+    reason.className = 'reason';
+    reason.textContent = suggestion.reason;
+    content.appendChild(reason);
+  }
+
+  header.appendChild(content);
+  div.appendChild(header);
+
+  return div;
+}
+
 function createStatItem(labelText, valueText) {
   const item = createElementWithText('div', null, 'stat-item');
   item.appendChild(createElementWithText('span', labelText, 'stat-label'));
@@ -202,28 +285,7 @@ function showSimilarTagsSuggestions(suggestions, warning = null) {
  * Creates an element for similar tag group
  */
 function createSimilarTagItem(suggestion, index) {
-  const div = document.createElement('div');
-  div.className = 'suggestion-item';
-  div.dataset.index = index;
-
-  const tagsPreview = suggestion.group.map(tag =>
-    `<span class="tag-name tag-group">${tag}</span>`
-  ).join(' ');
-
-  div.innerHTML = `
-    <div class="suggestion-header">
-      <input type="checkbox" class="suggestion-checkbox" data-index="${index}">
-      <div class="suggestion-content">
-        <div class="tag-preview">
-          ${tagsPreview}
-          <span class="arrow">→</span>
-          <span class="tag-name tag-new">${suggestion.suggested_name}</span>
-        </div>
-        <div class="reason">${suggestion.reason}</div>
-        <div class="impact">💡 ${suggestion.group.length} tags will be merged into 1 tag</div>
-      </div>
-    </div>
-  `;
+  const div = createSuggestionItem(suggestion, index, 'similar');
 
   const checkbox = div.querySelector('input[type="checkbox"]');
   checkbox.addEventListener('change', (e) => {
@@ -248,27 +310,27 @@ function showRenameSuggestions(suggestions) {
   pageTitle.textContent = 'Improve Tag Names';
 
   // Statistics
-  statsArea.innerHTML = `
-    <div class="stats">
-      <div class="stat-item">
-        <span class="stat-label">Suggestions</span>
-        <span class="stat-value">${suggestions.length}</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Selected</span>
-        <span class="stat-value" id="selectedCount">0</span>
-      </div>
-    </div>
-  `;
+  clearElement(statsArea);
+  const stats = createElementWithText('div', null, 'stats');
+  stats.appendChild(createStatItem('Suggestions', suggestions.length.toString()));
+  const selectedStat = createStatItem('Selected', '0');
+  selectedStat.querySelector('.stat-value').id = 'selectedCount';
+  stats.appendChild(selectedStat);
+  statsArea.appendChild(stats);
   statsArea.style.display = 'block';
 
   // Selection controls
   const controls = document.createElement('div');
   controls.className = 'selection-controls';
-  controls.innerHTML = `
-    <button id="selectAllBtn" class="btn-secondary">Select All</button>
-    <button id="selectNoneBtn" class="btn-secondary">Deselect All</button>
-  `;
+
+  const selectAllBtn = createElementWithText('button', 'Select All', 'btn-secondary');
+  selectAllBtn.id = 'selectAllBtn';
+  controls.appendChild(selectAllBtn);
+
+  const selectNoneBtn = createElementWithText('button', 'Deselect All', 'btn-secondary');
+  selectNoneBtn.id = 'selectNoneBtn';
+  controls.appendChild(selectNoneBtn);
+
   contentArea.appendChild(controls);
 
   // Add event listeners
@@ -295,23 +357,7 @@ function showRenameSuggestions(suggestions) {
  * Creates an element for rename suggestion
  */
 function createRenameItem(suggestion, index) {
-  const div = document.createElement('div');
-  div.className = 'suggestion-item';
-  div.dataset.index = index;
-
-  div.innerHTML = `
-    <div class="suggestion-header">
-      <input type="checkbox" class="suggestion-checkbox" data-index="${index}">
-      <div class="suggestion-content">
-        <div class="tag-preview">
-          <span class="tag-name tag-old">${suggestion.old_name}</span>
-          <span class="arrow">→</span>
-          <span class="tag-name tag-new">${suggestion.new_name}</span>
-        </div>
-        <div class="reason">${suggestion.reason}</div>
-      </div>
-    </div>
-  `;
+  const div = createSuggestionItem(suggestion, index, 'rename');
 
   const checkbox = div.querySelector('input[type="checkbox"]');
   checkbox.addEventListener('change', (e) => {
@@ -338,14 +384,10 @@ function showCategorizeSuggestions(data) {
   const categories = data.categories;
 
   // Statistics
-  statsArea.innerHTML = `
-    <div class="stats">
-      <div class="stat-item">
-        <span class="stat-label">Categories</span>
-        <span class="stat-value">${categories.length}</span>
-      </div>
-    </div>
-  `;
+  clearElement(statsArea);
+  const stats = createElementWithText('div', null, 'stats');
+  stats.appendChild(createStatItem('Categories', categories.length.toString()));
+  statsArea.appendChild(stats);
   statsArea.style.display = 'block';
 
   // Info message
@@ -359,15 +401,25 @@ function showCategorizeSuggestions(data) {
     const group = document.createElement('div');
     group.className = 'category-group';
 
-    group.innerHTML = `
-      <div class="category-header">
-        ${category.category}
-        <span class="category-description">${category.description}</span>
-      </div>
-      <div class="category-tags">
-        ${category.tags.map(tag => `<span class="tag-name tag-group">${tag}</span>`).join('')}
-      </div>
-    `;
+    const header = document.createElement('div');
+    header.className = 'category-header';
+    header.appendChild(document.createTextNode(category.category + ' '));
+
+    const desc = document.createElement('span');
+    desc.className = 'category-description';
+    desc.textContent = category.description;
+    header.appendChild(desc);
+    group.appendChild(header);
+
+    const tagsContainer = document.createElement('div');
+    tagsContainer.className = 'category-tags';
+    category.tags.forEach(tag => {
+      const tagSpan = document.createElement('span');
+      tagSpan.className = 'tag-name tag-group';
+      tagSpan.textContent = tag;
+      tagsContainer.appendChild(tagSpan);
+    });
+    group.appendChild(tagsContainer);
 
     section.appendChild(group);
   });
@@ -375,9 +427,12 @@ function showCategorizeSuggestions(data) {
   contentArea.appendChild(section);
 
   // Close button only
-  actionArea.innerHTML = '<button id="closeBtn" class="btn-secondary">Close</button>';
+  clearElement(actionArea);
+  const closeBtn = createElementWithText('button', 'Close', 'btn-secondary');
+  closeBtn.id = 'closeBtn';
+  actionArea.appendChild(closeBtn);
   actionArea.style.display = 'flex';
-  document.getElementById('closeBtn').addEventListener('click', () => window.close());
+  closeBtn.addEventListener('click', () => window.close());
 }
 
 /**
@@ -522,26 +577,13 @@ async function applySelectedSuggestions() {
     actionArea.style.display = 'none';
 
     // Zeige detaillierte Statistiken
-    statsArea.innerHTML = `
-      <div class="stats">
-        <div class="stat-item">
-          <span class="stat-label">📦 Tag Pairs Merged</span>
-          <span class="stat-value">${stats.pairsProcessed}</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">📧 Emails Updated</span>
-          <span class="stat-value">${stats.messagesUpdated}</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">🗑️ Tags Reduced</span>
-          <span class="stat-value">${stats.tagsReduced}</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">📊 Total Tags</span>
-          <span class="stat-value">${currentTagCount} (${usedTagCount} used)</span>
-        </div>
-      </div>
-    `;
+    clearElement(statsArea);
+    const statsDiv = createElementWithText('div', null, 'stats');
+    statsDiv.appendChild(createStatItem('📦 Tag Pairs Merged', stats.pairsProcessed.toString()));
+    statsDiv.appendChild(createStatItem('📧 Emails Updated', stats.messagesUpdated.toString()));
+    statsDiv.appendChild(createStatItem('🗑️ Tags Reduced', stats.tagsReduced.toString()));
+    statsDiv.appendChild(createStatItem('📊 Total Tags', `${currentTagCount} (${usedTagCount} used)`));
+    statsArea.appendChild(statsDiv);
     statsArea.style.display = 'block';
 
     // Hinweis ob weitere Analyse empfohlen wird
@@ -565,13 +607,19 @@ async function applySelectedSuggestions() {
     );
 
     // Füge "Re-analyze" Button hinzu
-    actionArea.innerHTML = `
-      <button id="reAnalyzeBtn" class="btn-primary">🔄 Run Analysis Again</button>
-      <button id="closeBtn" class="btn-secondary">Close</button>
-    `;
+    clearElement(actionArea);
+
+    const reAnalyzeBtn = createElementWithText('button', '🔄 Run Analysis Again', 'btn-primary');
+    reAnalyzeBtn.id = 'reAnalyzeBtn';
+    actionArea.appendChild(reAnalyzeBtn);
+
+    const closeBtn = createElementWithText('button', 'Close', 'btn-secondary');
+    closeBtn.id = 'closeBtn';
+    actionArea.appendChild(closeBtn);
+
     actionArea.style.display = 'flex';
 
-    document.getElementById('reAnalyzeBtn').addEventListener('click', async () => {
+    reAnalyzeBtn.addEventListener('click', async () => {
       // Öffne Popup wieder für neue Analyse
       await browser.tabs.create({
         url: browser.runtime.getURL('popup/popup.html')
@@ -579,7 +627,7 @@ async function applySelectedSuggestions() {
       window.close();
     });
 
-    document.getElementById('closeBtn').addEventListener('click', () => window.close());
+    closeBtn.addEventListener('click', () => window.close());
 
   } catch (error) {
     hideProgress();
