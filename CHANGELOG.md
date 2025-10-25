@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2025-01-26
+
+### Fixed
+- **Complete innerHTML Security Fixes**: Resolved all remaining unsafe innerHTML assignments
+  - Fixed 6 additional instances in results.js (lines 313, 330, 387, 430, 577, 607)
+  - Fixed 1 instance in popup.js (line 382)
+  - All dynamic user data now safely handled via createElement() and textContent
+  - Zero innerHTML warnings remaining in Mozilla validation
+
+### Changed
+- Version bumped to 1.1.2 for final security fixes
+- Extension now fully compliant with Mozilla Add-ons Store security requirements
+
 ## [1.1.1] - 2025-01-26
 
 ### Fixed
