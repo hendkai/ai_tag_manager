@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1] - 2025-01-26
+
+### Fixed
+- **Mozilla Add-ons Store Compatibility**: Resolved all validation issues for official store submission
+  - Replaced deprecated `applications` with `browser_specific_settings` in manifest.json
+  - Removed invalid Thunderbird-specific permissions (messagesRead, messagesUpdate, messagesTags, accountsRead)
+  - Thunderbird messenger APIs are now available by default
+- **Security Improvements**: Replaced all unsafe `innerHTML` assignments with secure DOM manipulation
+  - Added helper functions: `createElementWithText()`, `clearElement()`, `createStatItem()`
+  - Fixed 4 instances in popup.js
+  - Fixed 12 instances in results.js
+  - Prevents potential XSS vulnerabilities
+
+### Changed
+- Version bumped to 1.1.1 for bugfix release
+- No functional changes - only code quality and compatibility improvements
+
 ## [1.1.0] - 2025-01-26
 
 ### Added
