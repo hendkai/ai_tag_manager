@@ -7,6 +7,82 @@ let currentType = '';
 let selectedItems = new Set();
 let warningInfo = null;
 
+/**
+ * Safely create HTML elements to avoid innerHTML security issues
+ */
+function createElementWithText(tag, text, className = null) {
+  const el = document.createElement(tag);
+  if (text) el.textContent = text;
+  if (className) el.className = className;
+  return el;
+}
+
+function clearElement(element) {
+  while (element.firstChild) {
+    element.removeChild(element.firstChild);
+  }
+}
+
+function createStatItem(labelText, valueText) {
+  const item = createElementWithText('div', null, 'stat-item');
+  item.appendChild(createElementWithText('span', labelText, 'stat-label'));
+  item.appendChild(createElementWithText('span', valueText, 'stat-value'));
+  return item;
+}
+
+function createWarningBox(warning) {
+  const box = createElementWithText('div', null, 'warning-box');
+
+  box.appendChild(createElementWithText('h3', '⚠️ Incomplete Results - Token Limit Reached'));
+
+  const p1 = createElementWithText('p');
+  p1.appendChild(createElementWithText('strong', 'The AI found more similarities but couldn\'t return all of them.'));
+  box.appendChild(p1);
+
+  const stats = createElementWithText('div', null, 'warning-stats');
+  const createStat = (label, value) => {
+    const div = document.createElement('div');
+    div.appendChild(createElementWithText('strong', label + ': '));
+    div.appendChild(document.createTextNode(value));
+    return div;
+  };
+  stats.appendChild(createStat('Expected', `~${warning.expectedGroups} groups`));
+  stats.appendChild(createStat('Found', `${warning.foundGroups} groups`));
+  stats.appendChild(createStat('Coverage', `${warning.coveragePercent}% of your ${warning.totalTags} tags`));
+  stats.appendChild(createStat('Current Model', warning.model));
+  box.appendChild(stats);
+
+  box.appendChild(createElementWithText('h4', '💡 How to get complete results:'));
+
+  const ol = document.createElement('ol');
+
+  const li1 = document.createElement('li');
+  li1.appendChild(createElementWithText('strong', 'Best Solution: '));
+  li1.appendChild(document.createTextNode('Use a larger model in Settings:'));
+  const ul = document.createElement('ul');
+  ul.appendChild(createElementWithText('li')).appendChild(createElementWithText('strong', 'GPT-4o')).parentNode.appendChild(document.createTextNode(' (16K output) - Best for 1000+ tags'));
+  ul.appendChild(createElementWithText('li')).appendChild(createElementWithText('strong', 'Claude 3.5 Sonnet')).parentNode.appendChild(document.createTextNode(' (8K output) - Good for 1000+ tags'));
+  ul.appendChild(createElementWithText('li')).appendChild(createElementWithText('strong', 'Gemini 1.5 Pro')).parentNode.appendChild(document.createTextNode(' (8K output) - Good for 1000+ tags'));
+  li1.appendChild(ul);
+  ol.appendChild(li1);
+
+  const li2 = document.createElement('li');
+  li2.appendChild(createElementWithText('strong', 'Alternative: '));
+  li2.appendChild(document.createTextNode('Disable "Deep Analysis Mode" - processes tags in batches (no token limit issues)'));
+  ol.appendChild(li2);
+
+  const li3 = document.createElement('li');
+  li3.appendChild(createElementWithText('strong', 'Optional: '));
+  li3.appendChild(document.createTextNode('Remove unused tags first with "Clean Up Tags" to reduce total count'));
+  ol.appendChild(li3);
+
+  box.appendChild(ol);
+
+  box.appendChild(createElementWithText('p', `ℹ️ You can still apply these ${warning.foundGroups} suggestions and run the analysis again with a larger model to find more.`, 'warning-note'));
+
+  return box;
+}
+
 // Elements
 const backBtn = document.getElementById('backBtn');
 const pageIcon = document.getElementById('pageIcon');
@@ -67,35 +143,7 @@ function showSimilarTagsSuggestions(suggestions, warning = null) {
 
   // Zeige Warnung wenn Token-Limit erreicht wurde
   if (warning && warning.type === 'token_limit') {
-    const warningBox = document.createElement('div');
-    warningBox.className = 'warning-box';
-    warningBox.innerHTML = `
-      <h3>⚠️ Incomplete Results - Token Limit Reached</h3>
-      <p>
-        <strong>The AI found more similarities but couldn't return all of them.</strong>
-      </p>
-      <div class="warning-stats">
-        <div><strong>Expected:</strong> ~${warning.expectedGroups} groups</div>
-        <div><strong>Found:</strong> ${warning.foundGroups} groups</div>
-        <div><strong>Coverage:</strong> ${warning.coveragePercent}% of your ${warning.totalTags} tags</div>
-        <div><strong>Current Model:</strong> ${warning.model}</div>
-      </div>
-      <h4>💡 How to get complete results:</h4>
-      <ol>
-        <li><strong>Best Solution:</strong> Use a larger model in Settings:
-          <ul>
-            <li><strong>GPT-4o</strong> (16K output) - Best for 1000+ tags</li>
-            <li><strong>Claude 3.5 Sonnet</strong> (8K output) - Good for 1000+ tags</li>
-            <li><strong>Gemini 1.5 Pro</strong> (8K output) - Good for 1000+ tags</li>
-          </ul>
-        </li>
-        <li><strong>Alternative:</strong> Disable "Deep Analysis Mode" - processes tags in batches (no token limit issues)</li>
-        <li><strong>Optional:</strong> Remove unused tags first with "Clean Up Tags" to reduce total count</li>
-      </ol>
-      <p class="warning-note">
-        ℹ️ You can still apply these ${warning.foundGroups} suggestions and run the analysis again with a larger model to find more.
-      </p>
-    `;
+    const warningBox = createWarningBox(warning);
     contentArea.appendChild(warningBox);
   }
 
@@ -103,31 +151,31 @@ function showSimilarTagsSuggestions(suggestions, warning = null) {
   const totalGroups = suggestions.length;
   const totalTags = suggestions.reduce((sum, s) => sum + s.group.length, 0);
 
-  statsArea.innerHTML = `
-    <div class="stats">
-      <div class="stat-item">
-        <span class="stat-label">Groups Found</span>
-        <span class="stat-value">${totalGroups}</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Tags Affected</span>
-        <span class="stat-value">${totalTags}</span>
-      </div>
-      <div class="stat-item">
-        <span class="stat-label">Selected</span>
-        <span class="stat-value" id="selectedCount">0</span>
-      </div>
-    </div>
-  `;
+  // Clear and build stats
+  statsArea.textContent = '';
+  const stats = createElementWithText('div', null, 'stats');
+  stats.appendChild(createStatItem('Groups Found', totalGroups.toString()));
+  stats.appendChild(createStatItem('Tags Affected', totalTags.toString()));
+  const selectedStat = createStatItem('Selected', '0');
+  selectedStat.querySelector('.stat-value').id = 'selectedCount';
+  stats.appendChild(selectedStat);
+  statsArea.appendChild(stats);
   statsArea.style.display = 'block';
 
   // Selection controls
-  const controls = document.createElement('div');
-  controls.className = 'selection-controls';
-  controls.innerHTML = `
-    <button id="selectAllBtn" class="btn-secondary">Select All</button>
-    <button id="selectNoneBtn" class="btn-secondary">Deselect All</button>
-  `;
+  const controls = createElementWithText('div', null, 'selection-controls');
+  const selectAllBtn = document.createElement('button');
+  selectAllBtn.id = 'selectAllBtn';
+  selectAllBtn.className = 'btn-secondary';
+  selectAllBtn.textContent = 'Select All';
+  controls.appendChild(selectAllBtn);
+
+  const selectNoneBtn = document.createElement('button');
+  selectNoneBtn.id = 'selectNoneBtn';
+  selectNoneBtn.className = 'btn-secondary';
+  selectNoneBtn.textContent = 'Deselect All';
+  controls.appendChild(selectNoneBtn);
+
   contentArea.appendChild(controls);
 
   // Add event listeners
@@ -470,7 +518,7 @@ async function applySelectedSuggestions() {
     const currentTagCount = currentTagsResponse.success ? currentTagsResponse.tags.length : '?';
     const usedTagCount = currentTagsResponse.success ? currentTagsResponse.tags.filter(t => t.usage > 0).length : '?';
 
-    contentArea.innerHTML = '';
+    clearElement(contentArea);
     actionArea.style.display = 'none';
 
     // Zeige detaillierte Statistiken
@@ -590,6 +638,6 @@ function showMessage(text, type) {
   div.textContent = text;
   div.style.whiteSpace = 'pre-line';
 
-  messageArea.innerHTML = '';
+  clearElement(messageArea);
   messageArea.appendChild(div);
 }

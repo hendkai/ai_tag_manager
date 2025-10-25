@@ -96,19 +96,29 @@ async function loadTagStats() {
     const optimizationHint = document.getElementById('optimizationHint');
     const aggressiveCheckbox = document.getElementById('aggressiveModeCheckbox');
 
+    // Helper function to safely set HTML with dynamic values
+    function setHintText(emoji, boldText, normalText) {
+      optimizationHint.textContent = '';
+      optimizationHint.appendChild(document.createTextNode(emoji + ' '));
+      const strong = document.createElement('strong');
+      strong.textContent = boldText;
+      optimizationHint.appendChild(strong);
+      optimizationHint.appendChild(document.createTextNode(' ' + normalText));
+    }
+
     if (totalTags > 500) {
-      optimizationHint.innerHTML = `💡 <strong>Tip:</strong> You have ${totalTags} tags (${usedTags} used + ${unusedTags} unused). Deep Analysis Mode auto-enabled to analyze ALL tags together!`;
+      setHintText('💡', 'Tip:', `You have ${totalTags} tags (${usedTags} used + ${unusedTags} unused). Deep Analysis Mode auto-enabled to analyze ALL tags together!`);
       optimizationHint.style.display = 'block';
       // Auto-enable Deep Mode für viele Tags
       aggressiveCheckbox.checked = true;
     } else if (totalTags > 200) {
-      optimizationHint.innerHTML = `💡 <strong>Tip:</strong> You have ${totalTags} tags. Consider using "🔥 Deep Analysis Mode" to analyze ALL tags (including ${unusedTags} unused ones).`;
+      setHintText('💡', 'Tip:', `You have ${totalTags} tags. Consider using "🔥 Deep Analysis Mode" to analyze ALL tags (including ${unusedTags} unused ones).`);
       optimizationHint.style.display = 'block';
     } else if (unusedTags > 100) {
-      optimizationHint.innerHTML = `⚠️ <strong>Note:</strong> You have ${unusedTags} unused tags. AI will analyze ALL ${totalTags} tags (used + unused) to find duplicates. Or use "Clean Up Tags" to delete unused ones.`;
+      setHintText('⚠️', 'Note:', `You have ${unusedTags} unused tags. AI will analyze ALL ${totalTags} tags (used + unused) to find duplicates. Or use "Clean Up Tags" to delete unused ones.`);
       optimizationHint.style.display = 'block';
     } else if (unusedTags > 50) {
-      optimizationHint.innerHTML = `🧹 <strong>Tip:</strong> You have ${unusedTags} unused tags. They will be included in analysis, or use "Clean Up Tags" to remove them.`;
+      setHintText('🧹', 'Tip:', `You have ${unusedTags} unused tags. They will be included in analysis, or use "Clean Up Tags" to remove them.`);
       optimizationHint.style.display = 'block';
     } else {
       optimizationHint.style.display = 'none';

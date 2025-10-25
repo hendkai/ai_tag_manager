@@ -1,11 +1,11 @@
 {
   "manifest_version": 2,
   "name": "AI Tag Manager",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "AI-powered automatic management of Thunderbird tags - Merge similar tags, intelligent cleanup and more",
   "author": "Hendrik Kai",
 
-  "applications": {
+  "browser_specific_settings": {
     "gecko": {
       "id": "ai-tag-manager@hendkai.com",
       "strict_min_version": "91.0"
@@ -13,10 +13,6 @@
   },
 
   "permissions": [
-    "messagesRead",
-    "messagesUpdate",
-    "messagesTags",
-    "accountsRead",
     "storage",
     "tabs"
   ],
