@@ -12,6 +12,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 # Erstelle installierbare .xpi-Datei
 ./build.sh
+# oder
+npm run build
 
 # Output: ai-tag-manager-v{VERSION}.xpi
 ```
@@ -28,6 +30,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 # Test-Anfrage in Console
 browser.runtime.sendMessage({action: 'analyzeTags'}).then(console.log)
+```
+
+### Weitere Befehle
+```bash
+# Aktuell keine Tests oder Linting konfiguriert
+npm run test   # Placeholder
+npm run lint   # Placeholder
 ```
 
 ### Icon-Generierung
@@ -66,6 +75,7 @@ done
 
 3. **Popup UI** (`popup/popup.html`, `popup.js`)
    - Haupt-Interface für Benutzerinteraktionen
+   - Öffnet als separates Popup-Fenster (450x600px) statt browser_action popup
    - Tag-Statistiken und schnelle Aktionen
    - Asynchrone Kommunikation mit Background Script
    - Öffnet Results-Seite für KI-Vorschläge
@@ -93,16 +103,32 @@ const tags = await messenger.messages.listTags();
 // Tags einer Nachricht ändern
 await messenger.messages.update(messageId, { tags: ['tag1', 'tag2'] });
 
+// Neuen Tag erstellen
+await messenger.messages.tags.create(key, name, color);
+
+// Tag löschen
+await messenger.messages.tags.delete(key);
+
 // Account-Struktur
 const accounts = await messenger.accounts.list();
 // accounts[].folders[].subFolders - rekursive Struktur
 ```
 
+### Tag-Key Validierung
+
+Tag-Keys müssen dem Pattern `/^[^ ()/{%*<>"]+$/` entsprechen:
+- Keine Leerzeichen
+- Keine Sonderzeichen: `() / { } % * < > "`
+- `generateTagKey()` in background.js konvertiert Namen zu gültigen Keys
+
 ### Wichtige Berechtigungen (manifest.json)
 
 - `messagesRead` - Lesen von E-Mail-Metadaten
 - `messagesTags` - Zugriff auf Tag-System
+- `messagesUpdate` - Ändern von E-Mail-Tags
+- `accountsRead` - Zugriff auf Account-/Ordnerstruktur
 - `storage` - Speichern von Einstellungen
+- `tabs` - Öffnen neuer Tabs (für Results-Seite)
 
 ## Entwicklungs-Workflows
 
@@ -129,15 +155,61 @@ browser.runtime.onMessage.addListener(async (message) => {
       return handleAnalyzeTags();
   }
 });
+
+// Wichtig: Handler müssen Responses direkt zurückgeben (return), nicht sendResponse() verwenden
+// Response-Format: { success: true, data: ... } oder { error: "message" }
 ```
 
 ## KI-Prompt-Struktur
 
 Alle KI-Funktionen verwenden strukturierte Prompts mit:
-- Klare Rollenbe definition
+- Klare Rollendefinition
 - JSON-Format für Antworten
 - Explizite Anweisungen ("Nur JSON ausgeben")
 - `temperature: 0.3` für konsistente Ergebnisse
+
+### KI-Response-Formate
+
+**Similar Tags** (`findSimilarTags`):
+```json
+{
+  "groups": [
+    {
+      "group": ["tag1", "tag2", "tag3"],
+      "suggested_name": "unified_name",
+      "reason": "Explanation"
+    }
+  ]
+}
+```
+
+**Tag Rename** (`suggestTagNames`):
+```json
+{
+  "suggestions": [
+    {
+      "old_name": "current",
+      "new_name": "improved",
+      "reason": "Explanation"
+    }
+  ]
+}
+```
+
+**Categorize** (`categorizeTags`):
+```json
+{
+  "categories": [
+    {
+      "category": "Category Name",
+      "tags": ["tag1", "tag2"],
+      "description": "Description"
+    }
+  ]
+}
+```
+
+Die `cleanJsonResponse()` Funktion extrahiert JSON aus Markdown-Codeblöcken.
 
 ## Besonderheiten
 
@@ -264,7 +336,28 @@ http://localhost:11434/api/generate
 - Fehler-First-Pattern bei Responses (`{ success: true, data }` oder `{ error: message }`)
 - ESLint/Prettier werden nicht verwendet (optional hinzufügbar)
 
-## Spezielle Kontexte
+## Debugging & Testing
 
-### Beyond All Reason Spiel-Erkennung
-Wenn der Benutzer über das Spiel "Beyond All Reason" spricht, erkenne dies als Gaming-Kontext und passe die Antworten entsprechend an.
+### Browser Console Commands
+
+```javascript
+// Teste Tag-Analyse
+browser.runtime.sendMessage({action: 'analyzeTags'}).then(console.log)
+
+// Teste AI-Verbindung
+browser.runtime.sendMessage({
+  action: 'testAIConnection',
+  provider: 'openai',
+  apiKey: 'your-key'
+}).then(console.log)
+
+// Prüfe gespeicherte Einstellungen
+browser.storage.local.get().then(console.log)
+```
+
+### Häufige Fehlerquellen
+
+1. **"Tag already exists"**: Tag-Key bereits vorhanden - `handleMergeTags()` fängt dies ab und holt Tag-Liste neu
+2. **Undefined targetKey**: Tag konnte nicht erstellt werden - Prüfe Key-Validierung
+3. **JSON Parse Error**: KI-Response enthält zusätzlichen Text - `cleanJsonResponse()` entfernt Markdown-Blöcke
+4. **API Key not configured**: Provider-spezifischer API-Key fehlt in Settings

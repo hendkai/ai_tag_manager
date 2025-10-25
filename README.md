@@ -1,238 +1,291 @@
-# 🤖 AI Tag Manager für Thunderbird
+# 🤖 AI Tag Manager for Thunderbird
 
-Eine intelligente Thunderbird-Erweiterung, die künstliche Intelligenz nutzt, um deine E-Mail-Tags automatisch zu verwalten, zu optimieren und zu bereinigen.
+An intelligent Thunderbird extension that uses artificial intelligence to automatically manage, optimize, and clean up your email tags.
 
 ## ✨ Features
 
-### KI-gestützte Tag-Verwaltung
-- **Ähnliche Tags finden**: Die KI analysiert deine Tags und findet ähnliche oder doppelte Tags (z.B. "Projekt", "Projekte", "project")
-- **Tag-Namen verbessern**: Erhalte Vorschläge für konsistentere und klarere Tag-Namen
-- **Automatische Kategorisierung**: Organisiere deine Tags in sinnvolle Kategorien (Projekte, Prioritäten, Status, etc.)
-- **⭐ Interaktive Vorschläge**: Alle KI-Vorschläge werden in einer übersichtlichen Vorschau-Seite angezeigt - du entscheidest, welche angewendet werden!
+### AI-Powered Tag Management
+- **Find Similar Tags**: AI analyzes your tags and finds similar or duplicate tags (e.g., "Project", "Projects", "project")
+- **Improve Tag Names**: Get suggestions for more consistent and clearer tag names
+- **Automatic Categorization**: Organize your tags into meaningful categories (Projects, Priorities, Status, etc.)
+- **⭐ Interactive Suggestions**: All AI suggestions are displayed in a clear preview page - you decide which ones to apply!
+- **🔥 Deep Analysis Mode**: Analyze ALL tags in a single request for comprehensive similarity detection
 
-### Tag-Management
-- **Tag-Analyse**: Übersicht über alle Tags mit Verwendungsstatistiken
-- **Tags zusammenführen**: Führe ähnliche Tags automatisch zusammen
-- **Bereinigung**: Entferne ungenutzte Tags automatisch
-- **Konsistenz**: Stelle einheitliche Namenskonventionen sicher
+### Tag Management
+- **Tag Analysis**: Overview of all tags with usage statistics
+- **Merge Tags**: Automatically merge similar tags
+- **Cleanup**: Remove unused tags automatically
+- **Consistency**: Ensure uniform naming conventions
+- **Smart Warnings**: Token limit detection with actionable recommendations
 
-### Unterstützte KI-Anbieter
+### Supported AI Providers
 - **OpenAI** (GPT-4o, GPT-4o-mini, GPT-3.5)
+  - ⭐ GPT-4o recommended for 1000+ tags (16K output limit)
 - **Anthropic** (Claude 3.5 Sonnet, Claude 3.5 Haiku)
+  - ⭐ Claude 3.5 Sonnet recommended for 1000+ tags (8K output limit)
 - **Google AI** (Gemini 1.5 Flash, Gemini 1.5 Pro)
-- **Ollama** (lokal, kostenlos - llama3.2, mistral, gemma2, etc.)
+  - ⭐ Gemini 1.5 Pro recommended for 1000+ tags (8K output limit)
+- **Ollama** (local, free - llama3.2, mistral, gemma2, etc.)
 
 ## 📦 Installation
 
-### Aus dem Quellcode
+### From Source
 
-1. **Repository klonen oder herunterladen**
+1. **Clone or download the repository**
    ```bash
    git clone <repository-url>
    cd ai_tag_manager
    ```
 
-2. **In Thunderbird installieren**
-   - Öffne Thunderbird
-   - Gehe zu `Menü` → `Add-ons und Themes` (oder drücke `Strg+Shift+A`)
-   - Klicke auf das Zahnrad-Symbol ⚙️
-   - Wähle `Add-on aus Datei installieren...`
-   - Navigiere zum Ordner und wähle `manifest.json`
+2. **Install in Thunderbird**
+   - Open Thunderbird
+   - Go to `Menu` → `Add-ons and Themes` (or press `Ctrl+Shift+A`)
+   - Click the gear icon ⚙️
+   - Select `Install Add-on From File...`
+   - Navigate to the folder and select `manifest.json`
 
-### Alternativ: Debug-Modus
+### Alternative: Debug Mode
 
-Für Entwicklung und Testing:
-1. Öffne `about:debugging` in Thunderbird
-2. Klicke auf `Diesen Thunderbird`
-3. Klicke auf `Temporäres Add-on laden...`
-4. Wähle die `manifest.json` Datei
+For development and testing:
+1. Open `about:debugging` in Thunderbird
+2. Click `This Thunderbird`
+3. Click `Load Temporary Add-on...`
+4. Select the `manifest.json` file
 
-## 🚀 Erste Schritte
+## 🚀 Getting Started
 
-### 1. API-Schlüssel konfigurieren
+### 1. Configure API Key
 
-Öffne die Einstellungen der Erweiterung:
-- Klicke auf das AI Tag Manager Symbol in der Toolbar
-- Wähle `⚙️ Einstellungen öffnen`
+Open the extension settings:
+- Click the AI Tag Manager icon in the toolbar
+- Select `⚙️ Open Settings`
 
-Wähle deinen bevorzugten KI-Anbieter und trage den API-Schlüssel ein:
+Choose your preferred AI provider and enter your API key:
 
 #### OpenAI
-- Registriere dich auf [platform.openai.com](https://platform.openai.com/)
-- Erstelle einen API-Key unter [API Keys](https://platform.openai.com/api-keys)
-- Empfohlenes Modell: `gpt-4o-mini` (günstig und schnell)
+- Register at [platform.openai.com](https://platform.openai.com/)
+- Create an API key at [API Keys](https://platform.openai.com/api-keys)
+- Recommended model: `gpt-4o` for 1000+ tags, `gpt-4o-mini` for <1000 tags
 
 #### Anthropic (Claude)
-- Registriere dich auf [console.anthropic.com](https://console.anthropic.com/)
-- Erstelle einen API-Key
-- Empfohlenes Modell: `claude-3-5-sonnet-20241022`
+- Register at [console.anthropic.com](https://console.anthropic.com/)
+- Create an API key
+- Recommended model: `claude-3-5-sonnet-20241022` for best quality
 
 #### Google AI
-- Erstelle einen API-Key auf [Google AI Studio](https://makersuite.google.com/app/apikey)
-- Empfohlenes Modell: `gemini-1.5-flash`
+- Create an API key at [Google AI Studio](https://makersuite.google.com/app/apikey)
+- Recommended model: `gemini-1.5-pro` for 1000+ tags
 
-#### Ollama (Lokal & Kostenlos!)
-- Installiere [Ollama](https://ollama.ai)
-- Führe aus: `ollama pull llama3.2`
-- Keine API-Kosten! Läuft komplett lokal.
+#### Ollama (Local & Free!)
+- Install [Ollama](https://ollama.ai)
+- Run: `ollama pull llama3.2`
+- No API costs! Runs completely locally.
 
-### 2. Tags analysieren
+### 2. Analyze Tags
 
-1. Klicke auf das AI Tag Manager Symbol
-2. Klicke auf `📊 Tags analysieren`
-3. Du siehst nun eine Übersicht deiner Tags
+1. Click the AI Tag Manager icon
+2. Click `📊 Analyze Tags`
+3. You'll see an overview of your tags
 
-### 3. KI-Funktionen nutzen
+### 3. Use AI Functions
 
-#### Ähnliche Tags finden
-- Klicke auf `🔍 Ähnliche Tags finden`
-- Die KI analysiert deine Tags und schlägt Zusammenführungen vor
-- **Vorschau-Seite öffnet sich**: Hier kannst du jeden Vorschlag einzeln prüfen
-- Wähle aus, welche Vorschläge du anwenden möchtest
-- Klicke "Ausgewählte anwenden" um die gewählten Änderungen durchzuführen
+#### Find Similar Tags
+- Click `🔍 Find Similar Tags`
+- Enable **🔥 Deep Analysis Mode** for comprehensive analysis (recommended for 500+ tags)
+- AI analyzes your tags and suggests merges
+- **Preview page opens**: Review each suggestion individually
+- Select which suggestions to apply
+- Click "Apply Selected" to execute chosen changes
 
-#### Tag-Namen verbessern
-- Klicke auf `✨ Tag-Namen verbessern`
-- Erhalte Vorschläge für konsistentere Namen
-- **Interaktive Auswahl**: Wähle nur die Verbesserungen, die dir gefallen
-- Z.B. "ToDo" → "todo", "WICHTIG" → "wichtig"
+#### Improve Tag Names
+- Click `✨ Improve Tag Names`
+- Get suggestions for more consistent names
+- **Interactive selection**: Choose only the improvements you like
+- E.g., "ToDo" → "todo", "IMPORTANT" → "important"
 
-#### Tags kategorisieren
-- Klicke auf `📁 Tags kategorisieren`
-- Die KI sortiert deine Tags in sinnvolle Kategorien
-- **Übersichtsansicht**: Informative Darstellung deiner organisierten Tags
-- Hilft bei der Organisation großer Tag-Sammlungen
+#### Categorize Tags
+- Click `📁 Categorize Tags`
+- AI sorts your tags into meaningful categories
+- **Overview view**: Informative display of your organized tags
+- Helps organize large tag collections
 
-## ⚙️ Einstellungen
+## 📊 Understanding Token Limits
 
-### Tag-Management Optionen
+### What are tokens?
+Tokens are pieces of text that AI models process. When analyzing tags, the AI needs tokens for both reading your tags (input) and writing suggestions (output).
 
-- **Automatisches Zusammenführen**: Tags werden nach Bestätigung automatisch zusammengeführt
-- **Ähnlichkeitsschwelle**: Wie ähnlich Tags sein müssen (0.0 - 1.0)
-- **Ungenutzte Tags entfernen**: Automatisches Löschen bei Bereinigung
-- **Groß-/Kleinschreibung beachten**: Unterscheidung bei der Analyse
+### Why does this matter?
+Each AI model has a **maximum output limit**. With many tags (500+), the AI might find hundreds of similar groups, but if it hits the token limit, it can only return a fraction of them.
 
-### Erweiterte Optionen
+### Model Recommendations
 
-- **Max. Tags pro Analyse**: Begrenzung für sehr große Tag-Listen
-- **Detailliertes Logging**: Für Debugging und Entwicklung
+| Tag Count | Best Model | Output Limit | Quality |
+|-----------|------------|--------------|---------|
+| < 500 tags | Any model | - | Good |
+| 500-1000 tags | GPT-4o-mini, Gemini 1.5 Flash | 16K / 8K | Good |
+| 1000-2000 tags | ⭐ GPT-4o, Claude 3.5 Sonnet, Gemini 1.5 Pro | 16K / 8K | Excellent |
+| 2000+ tags | ⭐ GPT-4o only | 16K | Excellent |
 
-## 🔒 Datenschutz & Sicherheit
+### What happens with insufficient tokens?
+If you have 1000 tags and use a smaller model, the AI might only return 30-50 groups instead of 100+. The extension will:
+- ✅ Automatically recover partial results
+- ⚠️ Display a warning with coverage percentage
+- 💡 Recommend appropriate models for your tag count
 
-- **API-Keys werden nur lokal gespeichert** (in Thunderbird's Storage API)
-- **Keine Datensammlung**: Diese Erweiterung sammelt keine Nutzerdaten
-- **Tag-Inhalte werden an gewählte KI-API gesendet** (nur Tag-Namen, keine E-Mail-Inhalte!)
-- **Ollama-Option**: Nutze KI komplett lokal ohne Cloud-Verbindung
+## ⚙️ Settings
 
-## 🛠️ Entwicklung
+### Tag Management Options
 
-### Projektstruktur
+- **Automatic Merging**: Tags are merged after confirmation
+- **Similarity Threshold**: How similar tags must be (0.0 - 1.0)
+- **Remove Unused Tags**: Automatic deletion during cleanup
+- **Case Sensitive**: Distinction during analysis
+
+### Advanced Options
+
+- **Max. Tags per Analysis**: Limit for very large tag lists
+- **Detailed Logging**: For debugging and development
+- **🔥 Deep Analysis Mode**: Send ALL tags in ONE request for maximum coverage
+
+## 🔒 Privacy & Security
+
+- **API keys are stored locally only** (in Thunderbird's Storage API)
+- **No data collection**: This extension collects no user data
+- **Only tag names are sent to AI APIs** (never email content!)
+- **Ollama option**: Use AI completely locally without cloud connection
+
+## 🛠️ Development
+
+### Project Structure
 
 ```
 ai_tag_manager/
-├── manifest.json           # Erweiterungs-Manifest
+├── manifest.json           # Extension manifest
 ├── scripts/
-│   ├── background.js       # Hintergrund-Logik
-│   └── aiIntegration.js    # KI-API-Integration
+│   ├── background.js       # Background logic
+│   └── aiIntegration.js    # AI API integration
 ├── popup/
-│   ├── popup.html          # Popup-UI
-│   └── popup.js            # Popup-Logik
-├── results/                # ⭐ NEU
-│   ├── results.html        # Vorschau-Seite für KI-Vorschläge
-│   └── results.js          # Interaktive Auswahl-Logik
+│   ├── popup.html          # Popup UI
+│   └── popup.js            # Popup logic
+├── results/                # ⭐ NEW
+│   ├── results.html        # Preview page for AI suggestions
+│   └── results.js          # Interactive selection logic
 ├── options/
-│   ├── options.html        # Einstellungsseite
-│   └── options.js          # Einstellungs-Logik
-├── icons/                  # App-Icons
+│   ├── options.html        # Settings page
+│   └── options.js          # Settings logic
+├── icons/                  # App icons
 └── README.md
 ```
 
 ### Debugging
 
-1. Öffne `about:debugging` in Thunderbird
-2. Klicke auf die Erweiterung
-3. Öffne die `Console` für Logs
-4. Aktiviere "Detailliertes Logging" in den Einstellungen
+1. Open `about:debugging` in Thunderbird
+2. Click on the extension
+3. Open the `Console` for logs
+4. Enable "Detailed Logging" in settings
 
-### Logs anzeigen
+### View Logs
 
 ```javascript
-// In Browser Console (Strg+Shift+J)
+// In Browser Console (Ctrl+Shift+J)
 browser.runtime.sendMessage({action: 'analyzeTags'})
   .then(console.log)
 ```
 
-## 📝 Bekannte Einschränkungen
+## 📝 Known Limitations
 
-- **API-Kosten**: OpenAI, Anthropic und Google AI verursachen Kosten (nutze Ollama für kostenlose Alternative)
-- **Rate Limits**: KI-APIs haben Anfrage-Limits
-- **Tag-Limit**: Sehr große Tag-Listen (>100) können länger dauern
-- **Thunderbird >= 91**: Benötigt Thunderbird Version 91 oder höher
+- **API Costs**: OpenAI, Anthropic, and Google AI incur costs (use Ollama for free alternative)
+- **Rate Limits**: AI APIs have request limits
+- **Token Limits**: Large tag lists (1000+) may require larger models for complete results
+- **Thunderbird >= 91**: Requires Thunderbird version 91 or higher
 
-## 🤝 Beitragen
+## 🤝 Contributing
 
-Contributions sind willkommen! Bitte erstelle einen Pull Request oder öffne ein Issue.
+Contributions are welcome! Please create a pull request or open an issue.
 
-### Entwicklungsumgebung einrichten
+### Set Up Development Environment
 
 ```bash
-# Klone das Repository
+# Clone the repository
 git clone <repository-url>
 cd ai_tag_manager
 
-# In Thunderbird laden (about:debugging)
+# Load in Thunderbird (about:debugging)
 ```
 
-## 📄 Lizenz
+## 📄 License
 
-MIT License - siehe LICENSE Datei
+MIT License - see LICENSE file
 
 ## 🆘 Support
 
-Bei Fragen oder Problemen:
-1. Prüfe die [FAQ](#faq)
-2. Öffne ein Issue auf GitHub
-3. Aktiviere "Detailliertes Logging" für Debug-Informationen
+For questions or issues:
+1. Check the [FAQ](#faq)
+2. Open an issue on GitHub
+3. Enable "Detailed Logging" for debug information
 
 ## ❓ FAQ
 
-### Warum findet die KI keine ähnlichen Tags?
+### Why doesn't the AI find similar tags?
 
-- Deine Tags sind möglicherweise bereits sehr gut organisiert
-- Versuche die Ähnlichkeitsschwelle zu reduzieren
-- Stelle sicher, dass der API-Key korrekt ist
+- Your tags might already be very well organized
+- Try reducing the similarity threshold
+- Ensure the API key is correct
+- For 1000+ tags, use a larger model (GPT-4o recommended)
 
-### Werden meine E-Mails an die KI gesendet?
+### Are my emails sent to the AI?
 
-Nein! Nur die **Tag-Namen** werden analysiert, niemals E-Mail-Inhalte.
+No! Only the **tag names** are analyzed, never email content.
 
-### Kann ich die Erweiterung ohne Internet nutzen?
+### Can I use the extension without internet?
 
-Ja, mit **Ollama**! Installiere Ollama lokal und alle KI-Funktionen laufen offline.
+Yes, with **Ollama**! Install Ollama locally and all AI functions run offline.
 
-### Wie viel kostet die Nutzung?
+### How much does it cost?
 
-- **Ollama**: Kostenlos (lokal)
-- **OpenAI**: ~$0.001 pro Anfrage (gpt-4o-mini)
-- **Anthropic**: ~$0.003 pro Anfrage (Claude 3.5 Haiku)
-- **Google**: Kostenlos (mit Limits), dann ~$0.001 pro Anfrage
+- **Ollama**: Free (local)
+- **OpenAI**: ~$0.001 per request (gpt-4o-mini), ~$0.005 per request (gpt-4o)
+- **Anthropic**: ~$0.003 per request (Claude 3.5 Haiku), ~$0.015 per request (Claude 3.5 Sonnet)
+- **Google**: Free (with limits), then ~$0.001 per request
 
-### Welcher KI-Anbieter ist am besten?
+### Which AI provider is best?
 
-- **Für Kosten**: Ollama (kostenlos) oder OpenAI gpt-4o-mini
-- **Für Qualität**: Claude 3.5 Sonnet oder GPT-4o
-- **Für Datenschutz**: Ollama (komplett lokal)
+- **For cost**: Ollama (free) or OpenAI gpt-4o-mini
+- **For quality with large tag lists (1000+)**: GPT-4o or Claude 3.5 Sonnet
+- **For privacy**: Ollama (completely local)
+- **For speed**: Gemini 1.5 Flash or GPT-4o-mini
+
+### What is Deep Analysis Mode?
+
+Deep Analysis Mode sends ALL your tags in ONE single AI request for comprehensive comparison. Benefits:
+- ✅ Finds every possible similarity in a single pass
+- ✅ Compares all tags with each other
+- ✅ Best results for large tag collections
+- ⚠️ Requires larger models (GPT-4o, Claude Sonnet) for 1000+ tags
+- ⚠️ Higher API costs but fewer total requests
+
+### I'm getting token limit warnings. What should I do?
+
+When you see "Token limit reached" warnings:
+1. **Best solution**: Switch to a larger model (GPT-4o for 1000+ tags)
+2. **Alternative**: Disable Deep Analysis Mode (uses batches instead)
+3. **Optional**: Remove unused tags first to reduce total count
+
+The extension automatically recovers partial results and shows you exactly how many groups were found vs. expected.
 
 ## 🎯 Roadmap
 
-- [ ] Batch-Verarbeitung für große Tag-Listen
-- [ ] Undo/Redo für Tag-Änderungen
-- [ ] Tag-Regeln und Automatisierung
-- [ ] Mehr KI-Anbieter (Mistral, etc.)
-- [ ] Tag-Vorschläge basierend auf E-Mail-Inhalt
-- [ ] Import/Export von Tag-Konfigurationen
-- [ ] Mehrsprachige Benutzeroberfläche
+- [x] Deep Analysis Mode for comprehensive tag comparison
+- [x] Token limit detection and warnings
+- [x] Automatic partial result recovery
+- [x] Model recommendations based on tag count
+- [ ] Undo/Redo for tag changes
+- [ ] Tag rules and automation
+- [ ] More AI providers (Mistral, etc.)
+- [ ] Tag suggestions based on email content
+- [ ] Import/Export tag configurations
+- [ ] Multi-language user interface
 
 ---
 
-**Entwickelt mit ❤️ für besseres E-Mail-Management**
+**Developed with ❤️ for better email management**

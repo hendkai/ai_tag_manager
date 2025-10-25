@@ -289,8 +289,159 @@
       color: #c62828;
     }
 
+    .warning-box {
+      background: #fff3e0;
+      border: 2px solid #ff9800;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 25px;
+      color: #e65100;
+    }
+
+    .warning-box h3 {
+      margin-top: 0;
+      color: #e65100;
+      font-size: 18px;
+      margin-bottom: 12px;
+    }
+
+    .warning-box h4 {
+      color: #e65100;
+      font-size: 15px;
+      margin-top: 15px;
+      margin-bottom: 10px;
+    }
+
+    .warning-box p {
+      margin: 10px 0;
+      line-height: 1.6;
+      color: #333;
+    }
+
+    .warning-stats {
+      background: rgba(255, 255, 255, 0.6);
+      padding: 12px;
+      border-radius: 6px;
+      margin: 12px 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+      font-size: 14px;
+      color: #333;
+    }
+
+    .warning-stats strong {
+      color: #e65100;
+    }
+
+    .warning-box ol {
+      margin: 10px 0;
+      padding-left: 20px;
+      color: #333;
+    }
+
+    .warning-box li {
+      margin: 8px 0;
+      line-height: 1.6;
+    }
+
+    .warning-box ul {
+      margin: 8px 0;
+      padding-left: 20px;
+    }
+
+    .warning-box ul li {
+      margin: 4px 0;
+      color: #555;
+    }
+
+    .warning-note {
+      background: rgba(33, 150, 243, 0.1);
+      border-left: 3px solid #2196f3;
+      padding: 10px;
+      margin-top: 15px;
+      border-radius: 4px;
+      color: #1565c0 !important;
+      font-size: 14px;
+    }
+
     #backBtn {
       margin-bottom: 20px;
+    }
+
+    .progress-container {
+      margin: 20px 0;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      display: none;
+    }
+
+    .progress-container.active {
+      display: block;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .progress-title {
+      font-weight: 600;
+      color: #333;
+      font-size: 15px;
+    }
+
+    .progress-percentage {
+      font-weight: 600;
+      color: #0a84ff;
+      font-size: 18px;
+    }
+
+    .progress-bar-outer {
+      width: 100%;
+      height: 24px;
+      background: #e0e0e0;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-bar-inner {
+      height: 100%;
+      background: linear-gradient(90deg, #0a84ff, #0070e0);
+      border-radius: 12px;
+      transition: width 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 10px;
+      color: white;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .progress-details {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #666;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .progress-spinner {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #e0e0e0;
+      border-top: 2px solid #0a84ff;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
     }
   </style>
 </head>
@@ -307,6 +458,23 @@
   <div id="loadingArea" class="loading" style="display: none;">
     <div class="spinner"></div>
     <p>Analyzing tags with AI...</p>
+  </div>
+
+  <div id="progressContainer" class="progress-container">
+    <div class="progress-header">
+      <div class="progress-title">
+        <span class="progress-spinner"></span>
+        <span id="progressTitle">Applying changes...</span>
+      </div>
+      <div class="progress-percentage" id="progressPercentage">0%</div>
+    </div>
+    <div class="progress-bar-outer">
+      <div class="progress-bar-inner" id="progressBar" style="width: 0%"></div>
+    </div>
+    <div class="progress-details">
+      <span id="progressDetails">Processing...</span>
+      <span id="progressCount">0 / 0</span>
+    </div>
   </div>
 
   <div id="statsArea" style="display: none;"></div>

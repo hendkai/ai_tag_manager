@@ -75,16 +75,44 @@ async function loadTagStats() {
 
     currentTags = response.tags;
 
+    console.log(`📊 Loaded ${response.tags.length} tags from Thunderbird`);
+
     // Show statistics
     const totalTags = currentTags.length;
     const usedTags = currentTags.filter(t => t.usage > 0).length;
     const unusedTags = currentTags.filter(t => t.usage === 0).length;
+
+    console.log(`   - ${usedTags} used tags (with emails)`);
+    console.log(`   - ${unusedTags} unused tags (no emails)`);
+    console.log(`   - ALL ${totalTags} tags will be analyzed!`);
 
     document.getElementById('totalTags').textContent = totalTags;
     document.getElementById('usedTags').textContent = usedTags;
     document.getElementById('unusedTags').textContent = unusedTags;
 
     statsSection.style.display = 'block';
+
+    // Zeige Optimierungshinweis wenn viele Tags vorhanden
+    const optimizationHint = document.getElementById('optimizationHint');
+    const aggressiveCheckbox = document.getElementById('aggressiveModeCheckbox');
+
+    if (totalTags > 500) {
+      optimizationHint.innerHTML = `💡 <strong>Tip:</strong> You have ${totalTags} tags (${usedTags} used + ${unusedTags} unused). Deep Analysis Mode auto-enabled to analyze ALL tags together!`;
+      optimizationHint.style.display = 'block';
+      // Auto-enable Deep Mode für viele Tags
+      aggressiveCheckbox.checked = true;
+    } else if (totalTags > 200) {
+      optimizationHint.innerHTML = `💡 <strong>Tip:</strong> You have ${totalTags} tags. Consider using "🔥 Deep Analysis Mode" to analyze ALL tags (including ${unusedTags} unused ones).`;
+      optimizationHint.style.display = 'block';
+    } else if (unusedTags > 100) {
+      optimizationHint.innerHTML = `⚠️ <strong>Note:</strong> You have ${unusedTags} unused tags. AI will analyze ALL ${totalTags} tags (used + unused) to find duplicates. Or use "Clean Up Tags" to delete unused ones.`;
+      optimizationHint.style.display = 'block';
+    } else if (unusedTags > 50) {
+      optimizationHint.innerHTML = `🧹 <strong>Tip:</strong> You have ${unusedTags} unused tags. They will be included in analysis, or use "Clean Up Tags" to remove them.`;
+      optimizationHint.style.display = 'block';
+    } else {
+      optimizationHint.style.display = 'none';
+    }
   } catch (error) {
     showStatus('Error loading tags: ' + error.message, 'error');
   }
@@ -99,7 +127,11 @@ async function findSimilarTags() {
     return;
   }
 
-  showStatus('🔍 Finding similar tags with AI...', 'loading');
+  // Check if aggressive mode is enabled
+  const aggressiveMode = document.getElementById('aggressiveModeCheckbox').checked;
+  const modeText = aggressiveMode ? '🔥 Deep analysis mode' : 'Standard mode';
+
+  showStatus(`🔍 Finding similar tags with AI... (${modeText})`, 'loading');
   disableButtons(true);
 
   try {
@@ -107,18 +139,64 @@ async function findSimilarTags() {
 
     // Import AI module dynamically
     const aiModule = await import('../scripts/aiIntegration.js');
-    const similarGroups = await aiModule.findSimilarTags(currentTags, settings);
+    const result = await aiModule.findSimilarTags(currentTags, settings, aggressiveMode);
+
+    // Handle both old format (array) and new format (object with groups + warning)
+    const similarGroups = result.groups || result;
+    const warning = result.warning || null;
 
     if (similarGroups.length === 0) {
       showStatus('✓ No similar tags found! Your tags are already well organized.', 'success');
     } else {
-      showStatus(`✓ Found ${similarGroups.length} group(s) of similar tags!`, 'success');
+      // Berechne wie viele Tags betroffen sind
+      const affectedTags = similarGroups.reduce((sum, group) => sum + group.group.length, 0);
+      const potentialReduction = affectedTags - similarGroups.length;
 
-      // Save suggestions and open Results page
+      const coveragePercent = Math.round((affectedTags / currentTags.length) * 100);
+
+      console.log(`\n=== ANALYSIS RESULTS ===`);
+      console.log(`Groups found: ${similarGroups.length}`);
+      console.log(`Tags affected: ${affectedTags} (${coveragePercent}% of all tags)`);
+      console.log(`Tags unaffected: ${currentTags.length - affectedTags}`);
+      console.log(`Potential reduction: ${potentialReduction} tags`);
+      console.log(`Mode: ${aggressiveMode ? 'Deep Analysis' : 'Standard'}`);
+      console.log(`=======================\n`);
+
+      // Zeige Warnung wenn Token-Limit erreicht wurde
+      if (warning && warning.type === 'token_limit') {
+        console.warn(`⚠️ WARNING: Only ${coveragePercent}% of tags were grouped!`);
+        console.warn(`   This seems low. The AI may have hit token limits.`);
+        console.warn(`   Consider using a larger model (gpt-4o instead of gpt-4o-mini)`);
+
+        // Zeige auch im UI
+        showStatus(
+          `⚠️ Found ${similarGroups.length} groups (${coveragePercent}% coverage)\n` +
+          `Token limit likely reached! Expected ~${warning.expectedGroups} groups.\n` +
+          `Results may be incomplete. Check recommendations in results page.`,
+          'warning'
+        );
+      } else if (coveragePercent < 50 && aggressiveMode) {
+        console.warn(`⚠️ WARNING: Only ${coveragePercent}% of tags were grouped!`);
+
+        showStatus(
+          `⚠️ Found ${similarGroups.length} group(s) affecting ${affectedTags} tags\n` +
+          `Coverage: ${coveragePercent}% - This seems low, check results for details.`,
+          'warning'
+        );
+      } else {
+        showStatus(
+          `✓ Found ${similarGroups.length} group(s) affecting ${affectedTags} tags!\n` +
+          `Potential reduction: ${potentialReduction} tags`,
+          'success'
+        );
+      }
+
+      // Save suggestions AND warning and open Results page
       await browser.storage.local.set({
         pendingSuggestions: {
           type: 'similar',
-          suggestions: similarGroups
+          suggestions: similarGroups,
+          warning: warning // Speichere Warnung für Results-Seite
         }
       });
 

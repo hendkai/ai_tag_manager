@@ -18,16 +18,13 @@ browser.runtime.onInstalled.addListener(async (details) => {
   }
 });
 
-// Open popup window when toolbar button is clicked
+// Open popup when toolbar button is clicked
 messenger.browserAction.onClicked.addListener(async () => {
   const popupUrl = messenger.runtime.getURL('popup/popup.html');
 
-  // Create a small popup window
-  await messenger.windows.create({
-    url: popupUrl,
-    type: 'popup',
-    width: 450,
-    height: 600
+  // Open as tab for maximum compatibility with tiling WMs (like Hyprland)
+  await messenger.tabs.create({
+    url: popupUrl
   });
 });
 
@@ -79,9 +76,19 @@ async function handleAnalyzeTags() {
       await countTagsInFolders(folders, tagStats);
     }
 
+    const allTags = Object.values(tagStats);
+    const usedTags = allTags.filter(t => t.usage > 0).length;
+    const unusedTags = allTags.filter(t => t.usage === 0).length;
+
+    console.log(`\n📊 Tag Analysis Complete:`);
+    console.log(`   Total: ${allTags.length} tags`);
+    console.log(`   - ${usedTags} used (have emails)`);
+    console.log(`   - ${unusedTags} unused (no emails)`);
+    console.log(`   ✅ Returning ALL ${allTags.length} tags for analysis\n`);
+
     return {
       success: true,
-      tags: Object.values(tagStats)
+      tags: allTags
     };
   } catch (error) {
     console.error("Fehler bei Tag-Analyse:", error);
@@ -164,8 +171,13 @@ async function handleMergeTags(tagPairs) {
     const createdTags = {}; // Track tags created in this session
     const allKeys = Object.values(tagNameToKey); // Alle existierenden Keys
 
-    for (const pair of tagPairs) {
+    console.log(`Starting merge of ${tagPairs.length} tag pair(s)...`);
+
+    for (let i = 0; i < tagPairs.length; i++) {
+      const pair = tagPairs[i];
       const { sourceTag, targetTag } = pair;
+
+      console.log(`Processing pair ${i + 1}/${tagPairs.length}: ${sourceTag} -> ${targetTag}`);
 
       // Konvertiere Tag-Namen zu Keys (mit case-insensitive Fallback)
       let sourceKey = tagNameToKey[sourceTag] || normalizedTagMap[sourceTag.toLowerCase()] || sourceTag;
@@ -218,13 +230,19 @@ async function handleMergeTags(tagPairs) {
       }
 
       // Finde alle Nachrichten mit dem Quell-Tag
+      console.log(`Searching messages with tag ${sourceKey}...`);
       const accounts = await messenger.accounts.list();
       let movedCount = 0;
 
       for (const account of accounts) {
+        console.log(`Processing account: ${account.name}`);
         const folders = account.folders || [];
-        movedCount += await mergeTagsInFolders(folders, sourceKey, targetKey);
+        const accountMoved = await mergeTagsInFolders(folders, sourceKey, targetKey);
+        movedCount += accountMoved;
+        console.log(`Account ${account.name}: ${accountMoved} message(s) updated`);
       }
+
+      console.log(`Total messages updated for this pair: ${movedCount}`);
 
       // Lösche den Quell-Tag, wenn er nicht mehr gebraucht wird
       // (aber nur wenn es nicht der Ziel-Tag ist)
@@ -243,9 +261,36 @@ async function handleMergeTags(tagPairs) {
         targetTag,
         movedCount
       });
+
+      console.log(`Completed pair ${i + 1}/${tagPairs.length}: ${movedCount} message(s) updated`);
     }
 
-    return { success: true, results };
+    console.log(`All merges completed! Total pairs processed: ${results.length}`);
+
+    // Berechne Statistiken
+    const uniqueSourceTags = new Set(results.map(r => r.sourceTag)).size;
+    const uniqueTargetTags = new Set(results.map(r => r.targetTag)).size;
+    const totalMessagesUpdated = results.reduce((sum, r) => sum + r.movedCount, 0);
+    const tagsReduced = uniqueSourceTags - uniqueTargetTags;
+
+    console.log(`\n=== MERGE STATISTICS ===`);
+    console.log(`Source tags merged: ${uniqueSourceTags}`);
+    console.log(`Into target tags: ${uniqueTargetTags}`);
+    console.log(`Tags reduced by: ${tagsReduced}`);
+    console.log(`Total messages updated: ${totalMessagesUpdated}`);
+    console.log(`======================\n`);
+
+    return {
+      success: true,
+      results,
+      stats: {
+        pairsProcessed: results.length,
+        sourceTagsCount: uniqueSourceTags,
+        targetTagsCount: uniqueTargetTags,
+        tagsReduced: tagsReduced,
+        messagesUpdated: totalMessagesUpdated
+      }
+    };
   } catch (error) {
     console.error("Fehler beim Tag-Zusammenführen:", error);
     return { error: error.message };
@@ -269,20 +314,25 @@ async function mergeTagsInFolders(folders, sourceKey, targetKey) {
       const messages = await messenger.messages.list(folder);
 
       for (const message of messages.messages) {
-        if (message.tags && message.tags.includes(sourceKey)) {
-          // Entferne Quell-Tag und füge Ziel-Tag hinzu
-          let newTags = message.tags.filter(t => t !== sourceKey);
-          if (!newTags.includes(targetKey)) {
-            newTags.push(targetKey);
+        try {
+          if (message.tags && message.tags.includes(sourceKey)) {
+            // Entferne Quell-Tag und füge Ziel-Tag hinzu
+            let newTags = message.tags.filter(t => t !== sourceKey);
+            if (!newTags.includes(targetKey)) {
+              newTags.push(targetKey);
+            }
+
+            // Filter undefined/null Werte
+            newTags = newTags.filter(t => t !== undefined && t !== null && t !== '');
+
+            console.log(`Updating message ${message.id}: [${message.tags.join(', ')}] -> [${newTags.join(', ')}]`);
+
+            await messenger.messages.update(message.id, { tags: newTags });
+            count++;
           }
-
-          // Filter undefined/null Werte
-          newTags = newTags.filter(t => t !== undefined && t !== null && t !== '');
-
-          console.log(`Updating message ${message.id}: [${message.tags.join(', ')}] -> [${newTags.join(', ')}]`);
-
-          await messenger.messages.update(message.id, { tags: newTags });
-          count++;
+        } catch (msgError) {
+          console.error(`Fehler beim Aktualisieren von Nachricht ${message.id}:`, msgError);
+          // Weiter mit nächster Nachricht
         }
       }
 
@@ -293,6 +343,7 @@ async function mergeTagsInFolders(folders, sourceKey, targetKey) {
     } catch (error) {
       console.error(`Fehler beim Zusammenführen in Ordner ${folder.name}:`, error);
       console.error(`sourceKey: ${sourceKey}, targetKey: ${targetKey}`);
+      // Weiter mit nächstem Ordner
     }
   }
 
