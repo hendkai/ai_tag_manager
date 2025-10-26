@@ -14,7 +14,11 @@
 
   "permissions": [
     "storage",
-    "tabs"
+    "tabs",
+    "messagesRead",
+    "messagesTags",
+    "messagesUpdate",
+    "accountsRead"
   ],
 
   "background": {
