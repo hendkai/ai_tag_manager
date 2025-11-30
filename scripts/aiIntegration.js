@@ -588,7 +588,7 @@ async function callAnthropic(apiKey, prompt, settings) {
  * Google AI (Gemini) API Call
  */
 async function callGoogleAI(apiKey, prompt, settings) {
-  const model = settings.googleModel || "gemini-1.5-flash";
+  const model = settings.googleModel || "gemini-2.0-flash";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
   // Token-Limits basierend auf Mode
