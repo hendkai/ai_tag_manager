@@ -215,6 +215,9 @@ async function findSimilarTagsAggressive(tagNames, provider, settings) {
  * Findet ähnliche Tags für einen Batch
  */
 async function findSimilarTagsBatch(tagNames, provider, settings, aggressive = false) {
+  // Benutzerdefinierter Prompt aus Einstellungen
+  const customInstructions = settings.customPromptSimilar || '';
+
   const prompt = `Du bist ein Assistent zur Tag-Verwaltung in einem E-Mail-Client.
 
 Hier ist eine Liste von ${tagNames.length} Tags:
@@ -282,6 +285,7 @@ Antworte im JSON-Format mit einem Objekt das ein Array "groups" enthält:
 - Je kürzer, desto besser!
 - Das spart Tokens für MEHR Gruppen!
 
+${customInstructions ? `\n📝 ZUSÄTZLICHE ANWEISUNGEN:\n${customInstructions}\n` : ''}
 Nur JSON ausgeben, keine zusätzlichen Erklärungen.`;
 
   let response;
@@ -351,6 +355,9 @@ export async function suggestTagNames(tags, settings) {
  * Schlägt bessere Tag-Namen für einen Batch vor
  */
 async function suggestTagNamesBatch(tagNames, provider, settings) {
+  // Benutzerdefinierter Prompt aus Einstellungen
+  const customInstructions = settings.customPromptRename || '';
+
   const prompt = `Du bist ein Assistent zur Verbesserung von E-Mail-Tags.
 
 Hier sind die aktuellen Tags:
@@ -363,6 +370,7 @@ Beachte:
 - Konsistente Groß-/Kleinschreibung
 - Vermeidung von Sonderzeichen
 
+${customInstructions ? `\n📝 ZUSÄTZLICHE ANWEISUNGEN:\n${customInstructions}\n` : ''}
 Antworte im JSON-Format mit einem Objekt das ein Array "suggestions" enthält:
 {
   "suggestions": [
@@ -423,6 +431,9 @@ export async function categorizeTags(tags, settings) {
  * Kategorisiert Tags für einen Batch
  */
 async function categorizeTagsBatch(tagNames, provider, settings) {
+  // Benutzerdefinierter Prompt aus Einstellungen
+  const customInstructions = settings.customPromptCategorize || '';
+
   const prompt = `Analysiere diese E-Mail-Tags und kategorisiere sie in sinnvolle Gruppen.
 
 Tags (mit Verwendungshäufigkeit):
@@ -436,6 +447,7 @@ Erstelle Kategorien wie z.B.:
 - Personen
 etc.
 
+${customInstructions ? `\n📝 ZUSÄTZLICHE ANWEISUNGEN:\n${customInstructions}\n` : ''}
 Antworte im JSON-Format:
 {
   "categories": [

@@ -145,7 +145,7 @@ async function findSimilarTags() {
   disableButtons(true);
 
   try {
-    const settings = await browser.storage.local.get(['aiProvider', 'openaiApiKey', 'anthropicApiKey', 'googleApiKey', 'ollamaEndpoint', 'ollamaModel', 'openaiModel', 'anthropicModel', 'googleModel']);
+    const settings = await browser.storage.local.get(['aiProvider', 'openaiApiKey', 'anthropicApiKey', 'googleApiKey', 'ollamaEndpoint', 'ollamaModel', 'openaiModel', 'anthropicModel', 'googleModel', 'customPromptSimilar', 'customPromptRename', 'customPromptCategorize']);
 
     // Import AI module dynamically
     const aiModule = await import('../scripts/aiIntegration.js');
@@ -284,7 +284,7 @@ async function categorizeTags() {
   disableButtons(true);
 
   try {
-    const settings = await browser.storage.local.get(['aiProvider', 'openaiApiKey', 'anthropicApiKey', 'googleApiKey', 'ollamaEndpoint', 'ollamaModel', 'openaiModel', 'anthropicModel', 'googleModel']);
+    const settings = await browser.storage.local.get(['aiProvider', 'openaiApiKey', 'anthropicApiKey', 'googleApiKey', 'ollamaEndpoint', 'ollamaModel', 'openaiModel', 'anthropicModel', 'googleModel', 'customPromptSimilar', 'customPromptRename', 'customPromptCategorize']);
 
     const aiModule = await import('../scripts/aiIntegration.js');
     const result = await aiModule.categorizeTags(currentTags, settings);

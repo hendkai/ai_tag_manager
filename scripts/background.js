@@ -360,7 +360,8 @@ async function handleSuggestTagNames(tags) {
       'openaiApiKey', 'openaiModel', 'openaiEndpoint',
       'anthropicApiKey', 'anthropicModel',
       'googleApiKey', 'googleModel',
-      'ollamaEndpoint', 'ollamaModel'
+      'ollamaEndpoint', 'ollamaModel',
+      'customPromptSimilar', 'customPromptRename', 'customPromptCategorize'
     ]);
 
     // KI-Integration für Tag-Vorschläge

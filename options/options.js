@@ -55,6 +55,11 @@ async function loadSettings() {
       removeUnused: false,
       caseSensitive: false,
 
+      // Custom Prompts
+      customPromptSimilar: 'Bevorzuge deutsche Tag-Namen, wo sinnvoll.',
+      customPromptRename: 'Bevorzuge deutsche Tag-Namen, wo sinnvoll.',
+      customPromptCategorize: 'Erstelle Kategorienamen auf Deutsch.',
+
       // Erweitert
       maxTagsPerAnalysis: 100,
       enableLogging: false
@@ -80,6 +85,10 @@ async function loadSettings() {
     document.getElementById('similarityThreshold').value = settings.similarityThreshold;
     document.getElementById('removeUnused').checked = settings.removeUnused;
     document.getElementById('caseSensitive').checked = settings.caseSensitive;
+
+    document.getElementById('customPromptSimilar').value = settings.customPromptSimilar;
+    document.getElementById('customPromptRename').value = settings.customPromptRename;
+    document.getElementById('customPromptCategorize').value = settings.customPromptCategorize;
 
     document.getElementById('maxTagsPerAnalysis').value = settings.maxTagsPerAnalysis;
     document.getElementById('enableLogging').checked = settings.enableLogging;
@@ -118,6 +127,10 @@ saveButton.addEventListener('click', async () => {
       similarityThreshold: parseFloat(document.getElementById('similarityThreshold').value),
       removeUnused: document.getElementById('removeUnused').checked,
       caseSensitive: document.getElementById('caseSensitive').checked,
+
+      customPromptSimilar: document.getElementById('customPromptSimilar').value.trim(),
+      customPromptRename: document.getElementById('customPromptRename').value.trim(),
+      customPromptCategorize: document.getElementById('customPromptCategorize').value.trim(),
 
       maxTagsPerAnalysis: parseInt(document.getElementById('maxTagsPerAnalysis').value),
       enableLogging: document.getElementById('enableLogging').checked
