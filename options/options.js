@@ -56,9 +56,9 @@ async function loadSettings() {
       caseSensitive: false,
 
       // Custom Prompts
-      customPromptSimilar: 'Bevorzuge deutsche Tag-Namen, wo sinnvoll.',
-      customPromptRename: 'Bevorzuge deutsche Tag-Namen, wo sinnvoll.',
-      customPromptCategorize: 'Erstelle Kategorienamen auf Deutsch.',
+      customPromptSimilar: 'Prefer German tag names where appropriate.',
+      customPromptRename: 'Prefer German tag names where appropriate.',
+      customPromptCategorize: 'Create category names in German.',
 
       // Erweitert
       maxTagsPerAnalysis: 100,
